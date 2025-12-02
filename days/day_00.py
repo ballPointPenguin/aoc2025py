@@ -21,15 +21,16 @@ def _():
 @app.cell
 def _():
     # Imports
-    # import polars as pl
     # from more_itertools import chunked
     import sys
+
+    import polars as pl
 
     # Add src to path for local imports
     sys.path.insert(0, "../src")
     from aoc_utils import get_puzzle  # , parse_lines, parse_ints
 
-    return (get_puzzle,)
+    return get_puzzle, pl
 
 
 @app.cell
@@ -53,11 +54,12 @@ def _(mo, puzzle):
             ]
         )
         # Return the markdown object to ensure it is displayed
-        display = mo.md(f"## Examples\n\n{example_text}")
+        display_ex = mo.md(f"## Examples\n\n{example_text}")
     else:
-        display = mo.md("_No examples parsed from puzzle description._")
+        display_ex = mo.md("_No examples parsed from puzzle description._")
 
-    display
+    display_ex
+    return
 
 
 @app.cell
@@ -74,21 +76,40 @@ def _(mo):
     ## Part 1
     """
     )
+    return
 
 
 @app.cell
 def _(raw_input):
-    # Parse input for Part 1
     # TODO: Customize parsing based on actual puzzle
+    # Generic parsing function
+    def parse_input(data):
+        """Parse input as lines."""
+        return data.strip().split("\n")
 
-    # Example: parse as lines
-    lines = raw_input.strip().split("\n")
-
-    # Example: parse all integers from input
-    # numbers = parse_ints(raw_input)
-
+    # Parse input for Part 1
+    lines = parse_input(raw_input)
     lines[:5]  # Preview first 5 lines
-    return (lines,)
+    return lines, parse_input
+
+
+@app.cell
+def _(mo, parse_input, puzzle, solve_part1):
+    # Test against examples if available
+    if puzzle.examples:
+        example_results = []
+        for i, ex in enumerate(puzzle.examples):
+            example_lines = parse_input(ex.input_data)
+            result = solve_part1(example_lines)
+            expected = ex.answer_a
+            match = "✓" if result == int(expected) else "✗"
+            example_results.append(f"{match} Example {i + 1}: got {result}, expected {expected}")
+        display_test = mo.md("## Example Validation\n\n" + "\n\n".join(example_results))
+    else:
+        display_test = mo.md("_No examples parsed from puzzle description._")
+
+    display_test
+    return
 
 
 @app.cell
@@ -101,6 +122,25 @@ def _(lines):
 
     answer1 = solve_part1(lines)
     print(f"Part 1: {answer1}")
+    return (solve_part1,)
+
+
+@app.cell
+def _(lines, pl):
+    # Solve Part 1 with Polars
+    def solve_part1_pl(data):
+        """Solve part 1 using Polars - the over-engineered version!"""
+
+        # Parse input into a DataFrame
+        df = pl.DataFrame({"instruction": data})
+
+        # TODO solve part 1 with pl
+
+        return None, df
+
+    answer1_pl, df = solve_part1_pl(lines)
+    print(f"Part 1: {answer1_pl}")
+    print(f"Part 1 DataFrame: {df}")
     return
 
 
@@ -111,6 +151,7 @@ def _(mo):
     ## Part 2
     """
     )
+    return
 
 
 @app.cell
@@ -135,6 +176,7 @@ def _(mo):
     _Add your notes, observations, and approach explanations here._
     """
     )
+    return
 
 
 if __name__ == "__main__":

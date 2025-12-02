@@ -21,16 +21,17 @@ def _():
 @app.cell
 def _():
     # Imports
-    # import polars as pl
     # from more_itertools import chunked
     import sys
+
+    import polars as pl
 
     # Add src to path for local imports
     sys.path.insert(0, "../src")
     # from aoc_utils import get_puzzle, parse_lines, parse_ints
     from aoc_utils import get_puzzle
 
-    return (get_puzzle,)
+    return get_puzzle, pl
 
 
 @app.cell
@@ -54,11 +55,12 @@ def _(mo, puzzle):
             ]
         )
         # Return the markdown object to ensure it is displayed
-        display = mo.md(f"## Examples\n\n{example_text}")
+        display_ex = mo.md(f"## Examples\n\n{example_text}")
     else:
-        display = mo.md("_No examples parsed from puzzle description._")
+        display_ex = mo.md("_No examples parsed from puzzle description._")
 
-    display
+    display_ex
+    return
 
 
 @app.cell
@@ -66,6 +68,7 @@ def _(mo, raw_input):
     # Preview the input
     preview = raw_input[:500] + "..." if len(raw_input) > 500 else raw_input
     mo.md(f"## Input Preview\n```\n{preview}\n```")
+    return
 
 
 @app.cell
@@ -73,21 +76,39 @@ def _(mo):
     mo.md("""
     ## Part 1
     """)
+    return
 
 
 @app.cell
 def _(raw_input):
+    # Generic parsing function
+    def parse_input(data):
+        """Parse input as lines."""
+        return data.strip().split("\n")
+
     # Parse input for Part 1
-    # TODO: Customize parsing based on actual puzzle
-
-    # Example: parse as lines
-    lines = raw_input.strip().split("\n")
-
-    # Example: parse all integers from input
-    # numbers = parse_ints(raw_input)
-
+    lines = parse_input(raw_input)
     lines[:5]  # Preview first 5 lines
-    return (lines,)
+    return lines, parse_input
+
+
+@app.cell
+def _(mo, parse_input, puzzle, solve_part1):
+    # Test against examples if available
+    if puzzle.examples:
+        example_results = []
+        for i, ex in enumerate(puzzle.examples):
+            example_lines = parse_input(ex.input_data)
+            result = solve_part1(example_lines)
+            expected = ex.answer_a
+            match = "✓" if result == int(expected) else "✗"
+            example_results.append(f"{match} Example {i + 1}: got {result}, expected {expected}")
+        display_test = mo.md("## Example Validation\n\n" + "\n\n".join(example_results))
+    else:
+        display_test = mo.md("_No examples parsed from puzzle description._")
+
+    display_test
+    return
 
 
 @app.cell
@@ -95,11 +116,63 @@ def _(lines):
     # Solve Part 1
     def solve_part1(data):
         """Solve part 1 of the puzzle."""
-        # TODO: Implement solution
-        return None
+        position = 50
+        positions = []
+
+        for line in data:
+            direction = line[0]  # 'L' or 'R'
+            distance = int(line[1:])
+
+            if direction == "L":
+                position = (position - distance) % 100
+            else:
+                position = (position + distance) % 100
+
+            positions.append(position)
+
+        return positions.count(0)
 
     answer1 = solve_part1(lines)
     print(f"Part 1: {answer1}")
+    return (solve_part1,)
+
+
+@app.cell
+def _(lines, pl):
+    # Solve Part 1 with Polars
+    def solve_part1_pl(data):
+        """Solve part 1 using Polars - the over-engineered version!"""
+
+        # Parse input into a DataFrame
+        df = pl.DataFrame({"instruction": data})
+
+        # Extract direction and distance
+        df = df.with_columns(
+            direction=pl.col("instruction").str.head(1),
+            distance=pl.col("instruction").str.slice(1).cast(pl.Int32),
+        )
+
+        # Calculate the displacement (negative for L, positive for R)
+        df = df.with_columns(
+            displacement=pl.when(pl.col("direction") == "L")
+            .then(-pl.col("distance"))
+            .otherwise(pl.col("distance"))
+        )
+
+        # Calculate cumulative position with modulo, starting from 50
+        df = df.with_columns(position=(50 + pl.col("displacement").cum_sum()).mod(100))
+
+        # Add a previous position col to see the journey
+        df = df.with_columns(prev_position=pl.col("position").shift(1))
+
+        # Count how many times we land on position 0
+        zeros_count = (df.select(pl.col("position")) == 0).sum()[0, 0]
+
+        return zeros_count, df
+
+    answer1_pl, df = solve_part1_pl(lines)
+    print(f"Part 1: {answer1_pl}")
+    print(f"Part 1 DataFrame: {df}")
     return
 
 
@@ -108,6 +181,7 @@ def _(mo):
     mo.md("""
     ## Part 2
     """)
+    return
 
 
 @app.cell
@@ -130,6 +204,7 @@ def _(mo):
 
     _Add your notes, observations, and approach explanations here._
     """)
+    return
 
 
 if __name__ == "__main__":
