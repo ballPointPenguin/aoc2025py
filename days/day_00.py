@@ -52,10 +52,12 @@ def _(mo, puzzle):
                 for i, ex in enumerate(examples)
             ]
         )
-        mo.md(f"## Examples\n\n{example_text}")
+        # Return the markdown object to ensure it is displayed
+        display = mo.md(f"## Examples\n\n{example_text}")
     else:
-        mo.md("_No examples parsed from puzzle description._")
-    return
+        display = mo.md("_No examples parsed from puzzle description._")
+
+    display
 
 
 @app.cell
@@ -63,7 +65,6 @@ def _(mo, raw_input):
     # Preview the input
     preview = raw_input[:500] + "..." if len(raw_input) > 500 else raw_input
     mo.md(f"## Input Preview\n```\n{preview}\n```")
-    return
 
 
 @app.cell
@@ -73,7 +74,6 @@ def _(mo):
     ## Part 1
     """
     )
-    return
 
 
 @app.cell
@@ -111,7 +111,6 @@ def _(mo):
     ## Part 2
     """
     )
-    return
 
 
 @app.cell
@@ -136,7 +135,6 @@ def _(mo):
     _Add your notes, observations, and approach explanations here._
     """
     )
-    return
 
 
 if __name__ == "__main__":
