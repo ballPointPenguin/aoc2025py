@@ -1,7 +1,8 @@
 """Grid utilities for 2D puzzle problems."""
 
+from collections.abc import Iterator
 from dataclasses import dataclass
-from typing import Iterator, Self
+from typing import Self
 
 
 @dataclass(frozen=True, slots=True)

@@ -51,7 +51,7 @@ dependencies = [
     { name = "rustworkx" },
 ]
 
-[package.optional-dependencies]
+[package.dev-dependencies]
 dev = [
     { name = "pytest" },
     { name = "ruff" },
@@ -66,12 +66,15 @@ requires-dist = [
     { name = "more-itertools", specifier = ">=10.0" },
     { name = "numpy", specifier = ">=2.0" },
     { name = "polars", specifier = ">=1.0" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
     { name = "pyzmq", specifier = ">=27.1.0" },
-    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.8" },
     { name = "rustworkx", specifier = ">=0.15" },
 ]
-provides-extras = ["dev"]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "pytest", specifier = ">=8.0" },
+    { name = "ruff", specifier = ">=0.8" },
+]
 
 [[package]]
 name = "aocd-example-parser"

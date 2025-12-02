@@ -1,9 +1,7 @@
 """Common parsing utilities for Advent of Code puzzles."""
 
 import re
-from typing import Callable, TypeVar
-
-T = TypeVar("T")
+from collections.abc import Callable
 
 
 def parse_lines(data: str, strip: bool = True) -> list[str]:
@@ -34,9 +32,7 @@ def parse_ints(data: str) -> list[int]:
     return [int(x) for x in re.findall(r"-?\d+", data)]
 
 
-def parse_grid(
-    data: str, transform: Callable[[str], T] | None = None
-) -> list[list[T]]:
+def parse_grid[T](data: str, transform: Callable[[str], T] | None = None) -> list[list[T]]:
     """Parse input into a 2D grid.
 
     Args:
@@ -64,7 +60,7 @@ def parse_sections(data: str) -> list[str]:
     return data.strip().split("\n\n")
 
 
-def parse_grid_dict(
+def parse_grid_dict[T](
     data: str, transform: Callable[[str], T] | None = None
 ) -> dict[tuple[int, int], T]:
     """Parse input into a dict mapping (row, col) -> value.

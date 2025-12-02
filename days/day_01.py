@@ -21,13 +21,15 @@ def _():
 @app.cell
 def _():
     # Imports
-    import polars as pl
-    from more_itertools import chunked
+    # import polars as pl
+    # from more_itertools import chunked
     import sys
 
     # Add src to path for local imports
     sys.path.insert(0, "../src")
-    from aoc_utils import get_puzzle, parse_lines, parse_ints
+    # from aoc_utils import get_puzzle, parse_lines, parse_ints
+    from aoc_utils import get_puzzle
+
     return (get_puzzle,)
 
 
@@ -47,7 +49,7 @@ def _(mo, puzzle):
     if examples:
         example_text = "\n\n".join(
             [
-                f"**Example {i+1}:**\n```\n{ex.input_data}\n```\nExpected Part A: `{ex.answer_a}`"
+                f"**Example {i + 1}:**\n```\n{ex.input_data}\n```\nExpected Part A: `{ex.answer_a}`"
                 for i, ex in enumerate(examples)
             ]
         )

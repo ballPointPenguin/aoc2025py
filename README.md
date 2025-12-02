@@ -48,7 +48,7 @@ export AOC_SESSION="your_session_token_here"
 
 Or create a `.env` file (already in `.gitignore`):
 
-```
+```text
 AOC_SESSION=your_session_token_here
 ```
 
@@ -75,7 +75,7 @@ uv run python days/day_01.py
 
 ## Project Structure
 
-```
+```text
 .
 ├── pyproject.toml          # Project config and dependencies
 ├── src/
@@ -124,6 +124,27 @@ grid = Grid.from_string(raw_input)
 start = grid.find('S')
 for neighbor, value in grid.neighbors4(start):
     print(f"{neighbor}: {value}")
+```
+
+## Linting
+
+Ruff is included for linting and formatting. First install dev dependencies:
+
+```bash
+uv sync --group dev
+```
+
+Then run:
+
+```bash
+# Check for issues
+uv run ruff check .
+
+# Auto-fix issues
+uv run ruff check --fix .
+
+# Format code
+uv run ruff format .
 ```
 
 ## Tips
