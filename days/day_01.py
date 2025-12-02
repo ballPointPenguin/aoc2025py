@@ -1,15 +1,6 @@
-# /// script
-# requires-python = ">=3.12"
-# dependencies = [
-#     "marimo",
-#     "polars",
-#     "advent-of-code-data",
-# ]
-# ///
-
 import marimo
 
-__generated_with = "0.9.0"
+__generated_with = "0.18.1"
 app = marimo.App(width="medium")
 
 
@@ -37,8 +28,7 @@ def _():
     # Add src to path for local imports
     sys.path.insert(0, "../src")
     from aoc_utils import get_puzzle, parse_lines, parse_ints
-
-    return chunked, get_puzzle, parse_ints, parse_lines, pl, sys
+    return (get_puzzle,)
 
 
 @app.cell
@@ -47,7 +37,7 @@ def _(get_puzzle):
     DAY = 1
     puzzle = get_puzzle(year=2025, day=DAY)
     raw_input = puzzle.input_data
-    return DAY, puzzle, raw_input
+    return puzzle, raw_input
 
 
 @app.cell
@@ -64,7 +54,7 @@ def _(mo, puzzle):
         mo.md(f"## Examples\n\n{example_text}")
     else:
         mo.md("_No examples parsed from puzzle description._")
-    return example_text, examples
+    return
 
 
 @app.cell
@@ -72,13 +62,15 @@ def _(mo, raw_input):
     # Preview the input
     preview = raw_input[:500] + "..." if len(raw_input) > 500 else raw_input
     mo.md(f"## Input Preview\n```\n{preview}\n```")
-    return (preview,)
+    return
 
 
 @app.cell
 def _(mo):
-    mo.md("## Part 1")
-    return ()
+    mo.md("""
+    ## Part 1
+    """)
+    return
 
 
 @app.cell
@@ -106,13 +98,15 @@ def _(lines):
 
     answer1 = solve_part1(lines)
     print(f"Part 1: {answer1}")
-    return answer1, solve_part1
+    return
 
 
 @app.cell
 def _(mo):
-    mo.md("## Part 2")
-    return ()
+    mo.md("""
+    ## Part 2
+    """)
+    return
 
 
 @app.cell
@@ -125,19 +119,17 @@ def _(lines):
 
     answer2 = solve_part2(lines)
     print(f"Part 2: {answer2}")
-    return answer2, solve_part2
+    return
 
 
 @app.cell
 def _(mo):
-    mo.md(
-        """
-        ## Notes
+    mo.md("""
+    ## Notes
 
-        _Add your notes, observations, and approach explanations here._
-        """
-    )
-    return ()
+    _Add your notes, observations, and approach explanations here._
+    """)
+    return
 
 
 if __name__ == "__main__":
