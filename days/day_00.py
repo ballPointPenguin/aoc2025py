@@ -47,12 +47,14 @@ def _(mo, puzzle):
     # Show examples if available
     examples = puzzle.examples
     if examples:
-        example_text = "\n\n".join(
-            [
-                f"**Example {i + 1}:**\n```\n{ex.input_data}\n```\nExpected Part A: `{ex.answer_a}`"
-                for i, ex in enumerate(examples)
-            ]
-        )
+        example_parts = []
+        for i, ex in enumerate(examples):
+            part_text = f"**Example {i + 1}:**\n```\n{ex.input_data}\n```\n"
+            part_text += f"Expected Part A: `{ex.answer_a}`"
+            if ex.answer_b:
+                part_text += f"\n\nExpected Part B: `{ex.answer_b}`"
+            example_parts.append(part_text)
+        example_text = "\n\n".join(example_parts)
         # Return the markdown object to ensure it is displayed
         display_ex = mo.md(f"## Examples\n\n{example_text}")
     else:
@@ -155,6 +157,33 @@ def _(mo):
 
 
 @app.cell
+def _(mo, parse_input, puzzle, solve_part2):
+    # Test against examples if available for Part 2
+    if puzzle.examples:
+        _example_results_p2 = []
+        for _i, _ex in enumerate(puzzle.examples):
+            if _ex.answer_b:  # Only test if Part B answer exists
+                _example_lines_p2 = parse_input(_ex.input_data)
+                _result_p2 = solve_part2(_example_lines_p2)
+                _expected_p2 = _ex.answer_b
+                _match_p2 = "✓" if _result_p2 == int(_expected_p2) else "✗"
+                _example_results_p2.append(
+                    f"{_match_p2} Example {_i + 1}: got {_result_p2}, expected {_expected_p2}"
+                )
+        if _example_results_p2:
+            display_test_p2 = mo.md(
+                "## Part 2 Example Validation\n\n" + "\n\n".join(_example_results_p2)
+            )
+        else:
+            display_test_p2 = mo.md("_Part 2 examples not yet available._")
+    else:
+        display_test_p2 = mo.md("_No examples parsed from puzzle description._")
+
+    display_test_p2
+    return
+
+
+@app.cell
 def _(lines):
     # Solve Part 2
     def solve_part2(data):
@@ -164,7 +193,7 @@ def _(lines):
 
     answer2 = solve_part2(lines)
     print(f"Part 2: {answer2}")
-    return
+    return (solve_part2,)
 
 
 @app.cell
