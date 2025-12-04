@@ -21,15 +21,13 @@ def _():
 @app.cell
 def _():
     # Imports
-    # from more_itertools import chunked
     import sys
-
-    import polars as pl
 
     # Add src to path for local imports
     sys.path.insert(0, "../src")
     from aoc_utils import get_puzzle  # , parse_lines, parse_ints
-    return get_puzzle, pl
+
+    return (get_puzzle,)
 
 
 @app.cell
@@ -81,16 +79,14 @@ def _(mo):
 
 @app.cell
 def _(raw_input):
-    # TODO: Customize parsing based on actual puzzle
-    # Generic parsing function
     def parse_input(data):
-        """Parse input as lines."""
-        return data.strip().split("\n")
+        """Return a list of (start, end) tuples."""
+        return [tuple(map(int, r.split("-"))) for r in data.strip().split(",")]
 
     # Parse input for Part 1
-    lines = parse_input(raw_input)
-    lines[:5]  # Preview first 5 lines
-    return lines, parse_input
+    ranges = parse_input(raw_input)
+    ranges[:5]  # Preview first 5 tuples
+    return parse_input, ranges
 
 
 @app.cell
@@ -99,8 +95,8 @@ def _(mo, parse_input, puzzle, solve_part1):
     if puzzle.examples:
         example_results = []
         for test_i, test_ex in enumerate(puzzle.examples):
-            example_lines = parse_input(test_ex.input_data)
-            result = solve_part1(example_lines)
+            example_ranges = parse_input(test_ex.input_data)
+            result = solve_part1(example_ranges)
             expected = test_ex.answer_a
             match = "✓" if result == int(expected) else "✗"
             example_results.append(
@@ -115,35 +111,28 @@ def _(mo, parse_input, puzzle, solve_part1):
 
 
 @app.cell
-def _(lines):
+def _(ranges):
     # Solve Part 1
+    def is_repeated(n):
+        """Check if a sequence is repeated exactly twice"""
+        s = str(n)
+        if len(s) % 2 != 0 or len(s) == 0:
+            return False
+        mid = len(s) // 2
+        return s[:mid] == s[mid:] and s[0] != "0"
+
     def solve_part1(data):
         """Solve part 1 of the puzzle."""
-        # TODO: Implement solution
-        return None
+        total = 0
+        for start, end in data:
+            for id_num in range(start, end + 1):
+                if is_repeated(id_num):
+                    total += id_num
+        return total
 
-    answer1 = solve_part1(lines)
+    answer1 = solve_part1(ranges)
     print(f"Part 1: {answer1}")
     return (solve_part1,)
-
-
-@app.cell
-def _(lines, pl):
-    # Solve Part 1 with Polars
-    def solve_part1_pl(data):
-        """Solve part 1 using Polars - the over-engineered version!"""
-
-        # Parse input into a DataFrame
-        df = pl.DataFrame({"instruction": data})
-
-        # TODO solve part 1 with pl
-
-        return None, df
-
-    answer1_pl, df = solve_part1_pl(lines)
-    print(f"Part 1: {answer1_pl}")
-    print(f"Part 1 DataFrame: {df}")
-    return
 
 
 @app.cell
@@ -161,8 +150,8 @@ def _(mo, parse_input, puzzle, solve_part2):
         _example_results_p2 = []
         for _i, _ex in enumerate(puzzle.examples):
             if _ex.answer_b:  # Only test if Part 2 answer exists
-                _example_lines_p2 = parse_input(_ex.input_data)
-                _result_p2 = solve_part2(_example_lines_p2)
+                _example_list_p2 = parse_input(_ex.input_data)
+                _result_p2 = solve_part2(_example_list_p2)
                 _expected_p2 = _ex.answer_b
                 _match_p2 = "✓" if _result_p2 == int(_expected_p2) else "✗"
                 _example_results_p2.append(
@@ -182,33 +171,27 @@ def _(mo, parse_input, puzzle, solve_part2):
 
 
 @app.cell
-def _(lines):
+def _(ranges):
     # Solve Part 2
+    def is_repeated_2(n):
+        s = str(n)
+        if s[0] == "0":
+            return False
+        # Trick: if s is repeated, (s+s) contains s at position < len(s)
+        return (s + s).find(s, 1) < len(s)
+
     def solve_part2(data):
         """Solve part 2 of the puzzle."""
-        # TODO: Implement solution
-        return None
+        total = 0
+        for start, end in data:
+            for id_num in range(start, end + 1):
+                if is_repeated_2(id_num):
+                    total += id_num
+        return total
 
-    answer2 = solve_part2(lines)
+    answer2 = solve_part2(ranges)
     print(f"Part 2: {answer2}")
     return (solve_part2,)
-
-
-@app.cell
-def _(lines, pl):
-    # Solve Part 2 with Polars
-    def solve_part2_pl(data):
-        # Parse input into a DataFrame
-        df_2 = pl.DataFrame({"instruction": data})
-
-        # TODO solve part 2 with pl
-
-        return None, df_2
-
-    answer2_pl, df_2 = solve_part2_pl(lines)
-    print(f"Part 2: {answer2_pl}")
-    print(f"Part 2 DataFrame: {df_2}")
-    return
 
 
 @app.cell
