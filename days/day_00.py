@@ -50,9 +50,9 @@ def _(mo, puzzle):
         example_parts = []
         for i, ex in enumerate(examples):
             part_text = f"**Example {i + 1}:**\n```\n{ex.input_data}\n```\n"
-            part_text += f"Expected Part A: `{ex.answer_a}`"
+            part_text += f"Expected Part 1: `{ex.answer_a}`"
             if ex.answer_b:
-                part_text += f"\n\nExpected Part B: `{ex.answer_b}`"
+                part_text += f"\n\nExpected Part 2: `{ex.answer_b}`"
             example_parts.append(part_text)
         example_text = "\n\n".join(example_parts)
         # Return the markdown object to ensure it is displayed
@@ -100,12 +100,14 @@ def _(mo, parse_input, puzzle, solve_part1):
     # Test against examples if available
     if puzzle.examples:
         example_results = []
-        for i, ex in enumerate(puzzle.examples):
-            example_lines = parse_input(ex.input_data)
+        for test_i, test_ex in enumerate(puzzle.examples):
+            example_lines = parse_input(test_ex.input_data)
             result = solve_part1(example_lines)
-            expected = ex.answer_a
+            expected = test_ex.answer_a
             match = "✓" if result == int(expected) else "✗"
-            example_results.append(f"{match} Example {i + 1}: got {result}, expected {expected}")
+            example_results.append(
+                f"{match} Example {test_i + 1}: got {result}, expected {expected}"
+            )
         display_test = mo.md("## Example Validation\n\n" + "\n\n".join(example_results))
     else:
         display_test = mo.md("_No examples parsed from puzzle description._")
@@ -162,7 +164,7 @@ def _(mo, parse_input, puzzle, solve_part2):
     if puzzle.examples:
         _example_results_p2 = []
         for _i, _ex in enumerate(puzzle.examples):
-            if _ex.answer_b:  # Only test if Part B answer exists
+            if _ex.answer_b:  # Only test if Part 2 answer exists
                 _example_lines_p2 = parse_input(_ex.input_data)
                 _result_p2 = solve_part2(_example_lines_p2)
                 _expected_p2 = _ex.answer_b
@@ -194,6 +196,23 @@ def _(lines):
     answer2 = solve_part2(lines)
     print(f"Part 2: {answer2}")
     return (solve_part2,)
+
+
+@app.cell
+def _(lines, pl):
+    # Solve Part 2 with Polars
+    def solve_part2_pl(data):
+        # Parse input into a DataFrame
+        df_2 = pl.DataFrame({"instruction": data})
+
+        # TODO solve part 2 with pl
+
+        return None, df_2
+
+    answer2_pl, df_2 = solve_part2_pl(lines)
+    print(f"Part 2: {answer2_pl}")
+    print(f"Part 2 DataFrame: {df_2}")
+    return
 
 
 @app.cell

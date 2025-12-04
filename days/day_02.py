@@ -10,9 +10,9 @@ def _():
 
     mo.md(
         """
-        # Advent of Code 2025 - Day 1
+        # Advent of Code 2025 - Day 2
 
-        [Puzzle Link](https://adventofcode.com/2025/day/1)
+        [Puzzle Link](https://adventofcode.com/2025/day/2)
         """
     )
     return (mo,)
@@ -28,15 +28,14 @@ def _():
 
     # Add src to path for local imports
     sys.path.insert(0, "../src")
-    # from aoc_utils import get_puzzle, parse_lines, parse_ints
-    from aoc_utils import get_puzzle
+    from aoc_utils import get_puzzle  # , parse_lines, parse_ints
     return get_puzzle, pl
 
 
 @app.cell
 def _(get_puzzle):
     # Fetch puzzle data
-    DAY = 1
+    DAY = 2
     puzzle = get_puzzle(year=2025, day=DAY)
     raw_input = puzzle.input_data
     return puzzle, raw_input
@@ -82,6 +81,7 @@ def _(mo):
 
 @app.cell
 def _(raw_input):
+    # TODO: Customize parsing based on actual puzzle
     # Generic parsing function
     def parse_input(data):
         """Parse input as lines."""
@@ -119,21 +119,8 @@ def _(lines):
     # Solve Part 1
     def solve_part1(data):
         """Solve part 1 of the puzzle."""
-        position = 50
-        positions = []
-
-        for line in data:
-            direction = line[0]  # 'L' or 'R'
-            distance = int(line[1:])
-
-            if direction == "L":
-                position = (position - distance) % 100
-            else:
-                position = (position + distance) % 100
-
-            positions.append(position)
-
-        return positions.count(0)
+        # TODO: Implement solution
+        return None
 
     answer1 = solve_part1(lines)
     print(f"Part 1: {answer1}")
@@ -149,29 +136,9 @@ def _(lines, pl):
         # Parse input into a DataFrame
         df = pl.DataFrame({"instruction": data})
 
-        # Extract direction and distance
-        df = df.with_columns(
-            direction=pl.col("instruction").str.head(1),
-            distance=pl.col("instruction").str.slice(1).cast(pl.Int32),
-        )
+        # TODO solve part 1 with pl
 
-        # Calculate the displacement (negative for L, positive for R)
-        df = df.with_columns(
-            displacement=pl.when(pl.col("direction") == "L")
-            .then(-pl.col("distance"))
-            .otherwise(pl.col("distance"))
-        )
-
-        # Calculate cumulative position with modulo, starting from 50
-        df = df.with_columns(position=(50 + pl.col("displacement").cum_sum()).mod(100))
-
-        # Add a previous position col to see the journey
-        df = df.with_columns(prev_position=pl.col("position").shift(1))
-
-        # Count how many times we land on position 0
-        zeros_count = (df.select(pl.col("position")) == 0).sum()[0, 0]
-
-        return zeros_count, df
+        return None, df
 
     answer1_pl, df = solve_part1_pl(lines)
     print(f"Part 1: {answer1_pl}")
@@ -216,32 +183,11 @@ def _(mo, parse_input, puzzle, solve_part2):
 
 @app.cell
 def _(lines):
+    # Solve Part 2
     def solve_part2(data):
         """Solve part 2 of the puzzle."""
-        position = 50
-        zero_passings = 0
-
-        for line in data:
-            direction = line[0]  # 'L' or 'R'
-            distance = int(line[1:])
-
-            if direction == "R":
-                count = (position + distance) // 100
-                zero_passings += count
-                position = (position + distance) % 100
-            else:
-                if position == 0:
-                    # Starting at 0: only count complete wraps
-                    count = distance // 100
-                elif distance >= position:
-                    count = 1 + (distance - position) // 100
-                else:
-                    count = 0
-
-                position = (position - distance) % 100
-                zero_passings += count
-
-        return zero_passings
+        # TODO: Implement solution
+        return None
 
     answer2 = solve_part2(lines)
     print(f"Part 2: {answer2}")
@@ -255,43 +201,9 @@ def _(lines, pl):
         # Parse input into a DataFrame
         df_2 = pl.DataFrame({"instruction": data})
 
-        # Extract direction and distance
-        df_2 = df_2.with_columns(
-            direction=pl.col("instruction").str.head(1),
-            distance=pl.col("instruction").str.slice(1).cast(pl.Int32),
-        )
+        # TODO solve part 2 with pl
 
-        # Calculate the displacement (negative for L, positive for R)
-        df_2 = df_2.with_columns(
-            displacement=pl.when(pl.col("direction") == "L")
-            .then(-pl.col("distance"))
-            .otherwise(pl.col("distance"))
-        )
-
-        # Calculate cumulative position with modulo, starting from 50
-        df_2 = df_2.with_columns(position=(50 + pl.col("displacement").cum_sum()).mod(100))
-
-        # Shift column to track position_before
-        df_2 = df_2.with_columns(position_before=pl.col("position").shift(1, fill_value=50))
-
-        # Calculate zero crossings
-        # for RIGHT: (position_before + distance) // 100
-        # for LEFT: it's complicated
-        df_2 = df_2.with_columns(
-            zero_crossings=pl.when(pl.col("direction") == "R")
-            .then((pl.col("position_before") + pl.col("distance")) // 100)
-            .otherwise(
-                pl.when(pl.col("position_before") == 0)
-                .then(pl.col("distance") // 100)
-                .when(pl.col("distance") >= pl.col("position_before"))
-                .then(1 + (pl.col("distance") - pl.col("position_before")) // 100)
-                .otherwise(0)
-            )
-        )
-
-        total_crossings = df_2.select(pl.col("zero_crossings").sum())[0, 0]
-
-        return total_crossings, df_2
+        return None, df_2
 
     answer2_pl, df_2 = solve_part2_pl(lines)
     print(f"Part 2: {answer2_pl}")
