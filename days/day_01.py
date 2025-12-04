@@ -30,6 +30,7 @@ def _():
     sys.path.insert(0, "../src")
     # from aoc_utils import get_puzzle, parse_lines, parse_ints
     from aoc_utils import get_puzzle
+
     return get_puzzle, pl
 
 
@@ -244,6 +245,57 @@ def _(lines):
     answer2 = solve_part2(lines)
     print(f"Part 2: {answer2}")
     return (solve_part2,)
+
+
+@app.cell
+def _(lines, pl):
+    # Solve Part 2 with Polars
+    def solve_part2_pl(data):
+        # Parse input into a DataFrame
+        df_2 = pl.DataFrame({"instruction": data})
+
+        # Extract direction and distance
+        df_2 = df_2.with_columns(
+            direction=pl.col("instruction").str.head(1),
+            distance=pl.col("instruction").str.slice(1).cast(pl.Int32),
+        )
+
+        # Calculate the displacement (negative for L, positive for R)
+        df_2 = df_2.with_columns(
+            displacement=pl.when(pl.col("direction") == "L")
+            .then(-pl.col("distance"))
+            .otherwise(pl.col("distance"))
+        )
+
+        # Calculate cumulative position with modulo, starting from 50
+        df_2 = df_2.with_columns(position=(50 + pl.col("displacement").cum_sum()).mod(100))
+
+        # Shift column to track position_before
+        df_2 = df_2.with_columns(position_before=pl.col("position").shift(1, fill_value=50))
+
+        # Calculate zero crossings
+        # for RIGHT: (position_before + distance) // 100
+        # for LEFT: it's complicated
+        df_2 = df_2.with_columns(
+            zero_crossings=pl.when(pl.col("direction") == "R")
+            .then((pl.col("position_before") + pl.col("distance")) // 100)
+            .otherwise(
+                pl.when(pl.col("position_before") == 0)
+                .then(pl.col("distance") // 100)
+                .when(pl.col("distance") >= pl.col("position_before"))
+                .then(1 + (pl.col("distance") - pl.col("position_before")) // 100)
+                .otherwise(0)
+            )
+        )
+
+        total_crossings = df_2.select(pl.col("zero_crossings").sum())[0, 0]
+
+        return total_crossings, df_2
+
+    answer2_pl, df_2 = solve_part2_pl(lines)
+    print(f"Part 2: {answer2_pl}")
+    print(f"Part 2 DataFrame: {df_2}")
+    return
 
 
 @app.cell
