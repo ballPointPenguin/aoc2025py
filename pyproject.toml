@@ -6,26 +6,26 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     # Core data science
-    "polars>=1.0",
-    "jax[cpu]>=0.4",
-    "numpy>=2.0",
+    "polars>=1.35.2",
+    "jax[cpu]>=0.8.1",
+    "numpy>=2.3.5",
     # Graph algorithms
-    "rustworkx>=0.15",
+    "rustworkx>=0.17.1",
     # Parsing
-    "lark>=1.2",
+    "lark>=1.3.1",
     # Itertools extensions
-    "more-itertools>=10.0",
+    "more-itertools>=10.8.0",
     # Advent of Code data fetching
-    "advent-of-code-data>=2.1",
+    "advent-of-code-data>=2.1.0",
     # Notebook environment
-    "marimo>=0.9",
+    "marimo>=0.18.2",
     "pyzmq>=27.1.0",
 ]
 
 [dependency-groups]
 dev = [
-    "pytest>=8.0",
-    "ruff>=0.8",
+    "pytest>=9.0.1",
+    "ruff>=0.14.8",
 ]
 
 [build-system]
