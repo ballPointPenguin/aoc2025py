@@ -24,13 +24,11 @@ def _():
     # from more_itertools import chunked
     import sys
 
-    import polars as pl
-
     # Add src to path for local imports
     sys.path.insert(0, "../src")
-    from aoc_utils import get_puzzle  # , parse_lines, parse_ints
+    from aoc_utils import Grid, get_puzzle  # , parse_lines, parse_ints
 
-    return get_puzzle, pl
+    return Grid, get_puzzle
 
 
 @app.cell
@@ -69,30 +67,25 @@ def _(mo, raw_input):
     # Preview the input
     preview = raw_input[:500] + "..." if len(raw_input) > 500 else raw_input
     mo.md(f"## Input Preview\n```\n{preview}\n```")
-
-
-@app.cell
-def _(mo):
-    mo.md(
-        """
-    ## Part 1
-    """
-    )
     return
 
 
 @app.cell
-def _(raw_input):
-    # TODO: Customize parsing based on actual puzzle
-    # Generic parsing function
-    def parse_input(data):
-        """Parse input as lines."""
-        return data.strip().split("\n")
+def _(mo):
+    mo.md("""
+    ## Part 1
+    """)
+    return
 
-    # Parse input for Part 1
-    lines = parse_input(raw_input)
-    lines[:5]  # Preview first 5 lines
-    return lines, parse_input
+
+@app.cell
+def _(Grid, raw_input):
+    def parse_input(data):
+        """Parse into a Grid"""
+        return Grid.from_string(data)
+
+    grid = parse_input(raw_input)
+    return grid, parse_input
 
 
 @app.cell
@@ -101,9 +94,10 @@ def _(mo, parse_input, puzzle, solve_part1):
     if puzzle.examples:
         example_results = []
         for test_i, test_ex in enumerate(puzzle.examples):
-            example_lines = parse_input(test_ex.input_data)
-            result = solve_part1(example_lines)
-            expected = test_ex.answer_a
+            example_grid = parse_input(test_ex.input_data)
+            result = solve_part1(example_grid)
+            # expected = test_ex.answer_a
+            expected = 13
             match = "✓" if result == int(expected) else "✗"
             example_results.append(
                 f"{match} Example {test_i + 1}: got {result}, expected {expected}"
@@ -117,44 +111,30 @@ def _(mo, parse_input, puzzle, solve_part1):
 
 
 @app.cell
-def _(lines):
+def _(grid):
     # Solve Part 1
     def solve_part1(data):
         """Solve part 1 of the puzzle."""
-        # TODO: Implement solution
-        return None
+        rolls = data.find_all("@")
+        accessible = 0
 
-    answer1 = solve_part1(lines)
+        for pos in rolls:
+            neighbor_count = sum(1 for _, val in data.neighbors8(pos) if val == "@")
+            if neighbor_count < 4:
+                accessible += 1
+
+        return accessible
+
+    answer1 = solve_part1(grid)
     print(f"Part 1: {answer1}")
     return (solve_part1,)
 
 
 @app.cell
-def _(lines, pl):
-    # Solve Part 1 with Polars
-    def solve_part1_pl(data):
-        """Solve part 1 using Polars - the over-engineered version!"""
-
-        # Parse input into a DataFrame
-        df = pl.DataFrame({"instruction": data})
-
-        # TODO solve part 1 with pl
-
-        return None, df
-
-    answer1_pl, df = solve_part1_pl(lines)
-    print(f"Part 1: {answer1_pl}")
-    print(f"Part 1 DataFrame: {df}")
-    return
-
-
-@app.cell
 def _(mo):
-    mo.md(
-        """
+    mo.md("""
     ## Part 2
-    """
-    )
+    """)
     return
 
 
@@ -186,44 +166,118 @@ def _(mo, parse_input, puzzle, solve_part2):
 
 
 @app.cell
-def _(lines):
+def _(grid):
     # Solve Part 2
-    def solve_part2(data):
-        """Solve part 2 of the puzzle."""
-        # TODO: Implement solution
-        return None
+    def find_accessible_rolls(grid):
+        rolls = grid.find_all("@")
+        accessible = []
 
-    answer2 = solve_part2(lines)
+        for pos in rolls:
+            neighbor_count = sum(1 for _, val in grid.neighbors8(pos) if val == "@")
+            if neighbor_count < 4:
+                accessible.append(pos)
+
+        return accessible
+
+    def solve_part2(grid):
+        """Solve part 2 of the puzzle."""
+        # Work on a copy to avoid mutating the original
+        grid = grid.copy()
+        total_removed = 0
+
+        while True:
+            accessible = find_accessible_rolls(grid)
+            if not accessible:
+                break
+            for pos in accessible:
+                grid[pos] = "."
+            total_removed += len(accessible)
+
+        return total_removed
+
+    answer2 = solve_part2(grid)
     print(f"Part 2: {answer2}")
     return (solve_part2,)
 
 
 @app.cell
-def _(lines, pl):
-    # Solve Part 2 with Polars
-    def solve_part2_pl(data):
-        # Parse input into a DataFrame
-        df_2 = pl.DataFrame({"instruction": data})
+def _(raw_input):
+    # Solve Part 2 with JAX (vectorized)
+    # NOTE: We parse fresh from raw_input because the previous cell mutated `grid`
+    import jax
+    import jax.numpy as jnp
+    from jax.scipy.signal import convolve
 
-        # TODO solve part 2 with pl
+    def solve_part2_jax(raw_data, debug=False):
+        """Solve Part 2 using JAX vectorized operations."""
+        # Parse fresh from raw input (avoid mutation issues)
+        lines = raw_data.strip().split("\n")
 
-        return None, df_2
+        # Convert grid to binary array: @ = 1, . = 0
+        grid_array = jnp.array(
+            [[1 if cell == "@" else 0 for cell in line] for line in lines],
+            dtype=jnp.int32,
+        )
 
-    answer2_pl, df_2 = solve_part2_pl(lines)
-    print(f"Part 2: {answer2_pl}")
-    print(f"Part 2 DataFrame: {df_2}")
+        if debug:
+            print(f"Grid shape: {grid_array.shape}")
+            print(f"Initial @ count: {int(jnp.sum(grid_array))}")
+
+        # 3x3 kernel for counting 8 neighbors (center is 0)
+        kernel = jnp.array([[1, 1, 1], [1, 0, 1], [1, 1, 1]], dtype=jnp.int32)
+
+        # Debug: test convolution on initial grid
+        if debug:
+            test_counts = convolve(grid_array, kernel, mode="same", method="direct")
+            accessible = (grid_array == 1) & (test_counts < 4)
+            print(f"Initial accessible count: {int(jnp.sum(accessible))}")
+
+        def body_fun(carry):
+            """One iteration: find accessible, remove them, count."""
+            current_grid, total_removed = carry
+
+            # Count neighbors for each cell via convolution
+            neighbor_counts = convolve(current_grid, kernel, mode="same", method="direct")
+
+            # Find accessible: has paper roll (1) AND < 4 neighbors
+            accessible_mask = (current_grid == 1) & (neighbor_counts < 4)
+
+            # Count how many we're removing this round
+            num_removed = jnp.sum(accessible_mask)
+
+            # Remove them (set to 0)
+            new_grid = jnp.where(accessible_mask, 0, current_grid)
+
+            return (new_grid, total_removed + num_removed)
+
+        def cond_fun(carry):
+            """Continue while there are accessible rolls."""
+            current_grid, _ = carry
+            neighbor_counts = convolve(current_grid, kernel, mode="same", method="direct")
+            accessible_mask = (current_grid == 1) & (neighbor_counts < 4)
+            return jnp.sum(accessible_mask) > 0
+
+        # Run the functional while loop
+        init_val = (grid_array, 0)
+        _final_grid, total_removed = jax.lax.while_loop(cond_fun, body_fun, init_val)
+
+        if debug:
+            print(f"Final @ count: {int(jnp.sum(_final_grid))}")
+
+        return int(total_removed)
+
+    answer2_jax = solve_part2_jax(raw_input, debug=False)
+    print(f"Part 2 w/ JAX: {answer2_jax}")
     return
 
 
 @app.cell
 def _(mo):
-    mo.md(
-        """
+    mo.md("""
     ## Notes
 
     _Add your notes, observations, and approach explanations here._
-    """
-    )
+    """)
     return
 
 

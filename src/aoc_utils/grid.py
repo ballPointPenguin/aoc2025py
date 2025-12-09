@@ -1,5 +1,6 @@
 """Grid utilities for 2D puzzle problems."""
 
+import copy
 from collections.abc import Iterator
 from dataclasses import dataclass
 from typing import Self
@@ -116,3 +117,7 @@ class Grid[T]:
         for n in pos.neighbors8():
             if n in self:
                 yield n, self[n]
+
+    def copy(self) -> Self:
+        """Return a deep copy of this grid."""
+        return type(self)(copy.deepcopy(self.data))
