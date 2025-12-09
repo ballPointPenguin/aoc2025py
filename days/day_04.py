@@ -10,9 +10,9 @@ def _():
 
     mo.md(
         """
-        # Advent of Code 2025 - Day 3
+        # Advent of Code 2025 - Day 4
 
-        [Puzzle Link](https://adventofcode.com/2025/day/3)
+        [Puzzle Link](https://adventofcode.com/2025/day/4)
         """
     )
     return (mo,)
@@ -36,7 +36,7 @@ def _():
 @app.cell
 def _(get_puzzle):
     # Fetch puzzle data
-    DAY = 3
+    DAY = 4
     puzzle = get_puzzle(year=2025, day=DAY)
     raw_input = puzzle.input_data
     return puzzle, raw_input
@@ -69,14 +69,15 @@ def _(mo, raw_input):
     # Preview the input
     preview = raw_input[:500] + "..." if len(raw_input) > 500 else raw_input
     mo.md(f"## Input Preview\n```\n{preview}\n```")
-    return
 
 
 @app.cell
 def _(mo):
-    mo.md("""
+    mo.md(
+        """
     ## Part 1
-    """)
+    """
+    )
     return
 
 
@@ -120,16 +121,8 @@ def _(lines):
     # Solve Part 1
     def solve_part1(data):
         """Solve part 1 of the puzzle."""
-        sum = 0
-        for bank in data:
-            largest = max(bank[:-1], key=int)
-            idx = bank.index(largest)
-            tail = bank[idx + 1 :]
-            second = max(tail)
-            result = int(largest + second)
-            sum += result
-
-        return sum
+        # TODO: Implement solution
+        return None
 
     answer1 = solve_part1(lines)
     print(f"Part 1: {answer1}")
@@ -143,39 +136,11 @@ def _(lines, pl):
         """Solve part 1 using Polars - the over-engineered version!"""
 
         # Parse input into a DataFrame
-        # Extract all digit characters using regex
-        df = pl.DataFrame({"bank": data}).with_columns(
-            pl.col("bank")
-            .str.extract_all(r"\d")
-            .list.eval(pl.element().cast(pl.Int8))
-            .alias("digits")
-        )
+        df = pl.DataFrame({"instruction": data})
 
-        # Get the length of each bank for proper slicing
-        df = df.with_columns(pl.col("digits").list.len().alias("len"))
+        # TODO solve part 1 with pl
 
-        # Find the max digit in all but the last position (bank[:-1])
-        # Use explicit length-1 since list.head(-1) doesn't work like Python's [:-1]
-        df = df.with_columns(
-            pl.col("digits").list.slice(0, pl.col("len") - 1).list.max().alias("first")
-        )
-
-        # Find the FIRST index of the max digit using string search on original bank
-        # This matches Python's str.index() behavior which finds the first occurrence
-        df = df.with_columns(
-            pl.col("bank").str.find(pl.col("first").cast(pl.String)).alias("first_idx")
-        )
-
-        # Get the tail after the first digit and find its max
-        df = df.with_columns(
-            pl.col("digits").list.slice(pl.col("first_idx") + 1).list.max().alias("second")
-        )
-
-        df = df.with_columns((pl.col("first") * 10 + pl.col("second")).alias("joltage"))
-
-        total = df["joltage"].sum()
-
-        return total, df
+        return None, df
 
     answer1_pl, df = solve_part1_pl(lines)
     print(f"Part 1: {answer1_pl}")
@@ -185,9 +150,11 @@ def _(lines, pl):
 
 @app.cell
 def _(mo):
-    mo.md("""
+    mo.md(
+        """
     ## Part 2
-    """)
+    """
+    )
     return
 
 
@@ -220,31 +187,11 @@ def _(mo, parse_input, puzzle, solve_part2):
 
 @app.cell
 def _(lines):
-    def find_max(bank):
-        max_digit = max(bank, key=int)
-        max_idx = bank.index(max_digit)
-
-        return max_digit, max_idx
-
     # Solve Part 2
     def solve_part2(data):
         """Solve part 2 of the puzzle."""
-        sum = 0
-        for bank in data:
-            rem = 11
-            tail = bank
-            joltage = ""
-
-            while rem >= 0:
-                window = tail[:-rem] if rem else tail
-                digit, idx = find_max(window)
-                joltage += digit
-                tail = tail[idx + 1 :]
-                rem -= 1
-
-            sum += int(joltage)
-
-        return sum
+        # TODO: Implement solution
+        return None
 
     answer2 = solve_part2(lines)
     print(f"Part 2: {answer2}")
@@ -255,52 +202,12 @@ def _(lines):
 def _(lines, pl):
     # Solve Part 2 with Polars
     def solve_part2_pl(data):
-        """Solve part 2 using Polars - with a Python UDF for the greedy algorithm.
-
-        Note: This is a sequential, stateful algorithm that doesn't map well to
-        Polars' columnar operations, so we use map_elements() with a Python function.
-        """
-
-        def greedy_pick_12(digits_list):
-            """Greedy algorithm to pick 12 digits that form the largest number."""
-            digits = list(digits_list)  # Convert to Python list
-            bank_len = len(digits)
-            digits_to_pick = 12
-            result = []
-            start_pos = 0
-
-            for remaining in range(digits_to_pick, 0, -1):
-                # Window end: leave room for (remaining - 1) more digits
-                window_end = bank_len - (remaining - 1)
-                window = digits[start_pos:window_end]
-
-                # Find max in window
-                max_digit = max(window)
-                max_idx = window.index(max_digit)
-
-                # Add to result and update position
-                result.append(max_digit)
-                start_pos = start_pos + max_idx + 1
-
-            # Convert list of digits to integer
-            return int("".join(map(str, result)))
-
         # Parse input into a DataFrame
-        df_2 = pl.DataFrame({"bank": data}).with_columns(
-            pl.col("bank")
-            .str.extract_all(r"\d")
-            .list.eval(pl.element().cast(pl.Int8))
-            .alias("digits")
-        )
+        df_2 = pl.DataFrame({"instruction": data})
 
-        # Apply the greedy algorithm using map_elements
-        df_2 = df_2.with_columns(
-            pl.col("digits").map_elements(greedy_pick_12, return_dtype=pl.Int64).alias("joltage")
-        )
+        # TODO solve part 2 with pl
 
-        total = df_2["joltage"].sum()
-
-        return total, df_2
+        return None, df_2
 
     answer2_pl, df_2 = solve_part2_pl(lines)
     print(f"Part 2: {answer2_pl}")
@@ -310,11 +217,13 @@ def _(lines, pl):
 
 @app.cell
 def _(mo):
-    mo.md("""
+    mo.md(
+        """
     ## Notes
 
     _Add your notes, observations, and approach explanations here._
-    """)
+    """
+    )
     return
 
 
