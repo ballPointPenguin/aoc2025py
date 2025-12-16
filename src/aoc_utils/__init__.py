@@ -3,6 +3,7 @@
 from .fetching import get_examples, get_input, get_puzzle
 from .grid import EAST, NORTH, SOUTH, WEST, Grid, Point
 from .parsing import parse_grid, parse_ints, parse_lines, parse_sections
+from .union_find import UnionFind
 
 __all__ = [
     "get_puzzle",
@@ -18,4 +19,5 @@ __all__ = [
     "SOUTH",
     "EAST",
     "WEST",
+    "UnionFind",
 ]
