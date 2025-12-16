@@ -31,6 +31,7 @@ def _():
     # Add src to path for local imports
     sys.path.insert(0, "../src")
     from aoc_utils import UnionFind, get_puzzle
+
     return UnionFind, combinations, get_puzzle, np
 
 

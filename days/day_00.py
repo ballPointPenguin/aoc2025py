@@ -21,16 +21,13 @@ def _():
 @app.cell
 def _():
     # Imports
-    # from more_itertools import chunked
     import sys
-
-    import polars as pl
 
     # Add src to path for local imports
     sys.path.insert(0, "../src")
     from aoc_utils import get_puzzle  # , parse_lines, parse_ints
 
-    return get_puzzle, pl
+    return get_puzzle
 
 
 @app.cell
@@ -67,8 +64,10 @@ def _(mo, puzzle):
 @app.cell
 def _(mo, raw_input):
     # Preview the input
-    preview = raw_input[:500] + "..." if len(raw_input) > 500 else raw_input
-    mo.md(f"## Input Preview\n```\n{preview}\n```")
+    input_len = len(raw_input)
+    preview = raw_input[:500] + "..." if input_len > 500 else raw_input
+    mo.md(f"## Input Preview\nlength: {input_len}\n```\n{preview}\n```")
+    return
 
 
 @app.cell
@@ -130,25 +129,6 @@ def _(lines):
 
 
 @app.cell
-def _(lines, pl):
-    # Solve Part 1 with Polars
-    def solve_part1_pl(data):
-        """Solve part 1 using Polars - the over-engineered version!"""
-
-        # Parse input into a DataFrame
-        df = pl.DataFrame({"instruction": data})
-
-        # TODO solve part 1 with pl
-
-        return None, df
-
-    answer1_pl, df = solve_part1_pl(lines)
-    print(f"Part 1: {answer1_pl}")
-    print(f"Part 1 DataFrame: {df}")
-    return
-
-
-@app.cell
 def _(mo):
     mo.md(
         """
@@ -161,27 +141,27 @@ def _(mo):
 @app.cell
 def _(mo, parse_input, puzzle, solve_part2):
     # Test against examples if available for Part 2
-    if puzzle.examples:
-        _example_results_p2 = []
-        for _i, _ex in enumerate(puzzle.examples):
-            if _ex.answer_b:  # Only test if Part 2 answer exists
-                _example_lines_p2 = parse_input(_ex.input_data)
-                _result_p2 = solve_part2(_example_lines_p2)
-                _expected_p2 = _ex.answer_b
-                _match_p2 = "✓" if _result_p2 == int(_expected_p2) else "✗"
-                _example_results_p2.append(
-                    f"{_match_p2} Example {_i + 1}: got {_result_p2}, expected {_expected_p2}"
-                )
-        if _example_results_p2:
-            display_test_p2 = mo.md(
-                "## Part 2 Example Validation\n\n" + "\n\n".join(_example_results_p2)
-            )
-        else:
-            display_test_p2 = mo.md("_Part 2 examples not yet available._")
-    else:
-        display_test_p2 = mo.md("_No examples parsed from puzzle description._")
+    # if puzzle.examples:
+    #     _example_results_p2 = []
+    #     for _i, _ex in enumerate(puzzle.examples):
+    #         if _ex.answer_b:  # Only test if Part 2 answer exists
+    #             _example_lines_p2 = parse_input(_ex.input_data)
+    #             _result_p2 = solve_part2(_example_lines_p2)
+    #             _expected_p2 = _ex.answer_b
+    #             _match_p2 = "✓" if _result_p2 == int(_expected_p2) else "✗"
+    #             _example_results_p2.append(
+    #                 f"{_match_p2} Example {_i + 1}: got {_result_p2}, expected {_expected_p2}"
+    #             )
+    #     if _example_results_p2:
+    #         display_test_p2 = mo.md(
+    #             "## Part 2 Example Validation\n\n" + "\n\n".join(_example_results_p2)
+    #         )
+    #     else:
+    #         display_test_p2 = mo.md("_Part 2 examples not yet available._")
+    # else:
+    #     display_test_p2 = mo.md("_No examples parsed from puzzle description._")
 
-    display_test_p2
+    # display_test_p2
     return
 
 
@@ -193,26 +173,9 @@ def _(lines):
         # TODO: Implement solution
         return None
 
-    answer2 = solve_part2(lines)
-    print(f"Part 2: {answer2}")
+    # answer2 = solve_part2(lines)
+    # print(f"Part 2: {answer2}")
     return (solve_part2,)
-
-
-@app.cell
-def _(lines, pl):
-    # Solve Part 2 with Polars
-    def solve_part2_pl(data):
-        # Parse input into a DataFrame
-        df_2 = pl.DataFrame({"instruction": data})
-
-        # TODO solve part 2 with pl
-
-        return None, df_2
-
-    answer2_pl, df_2 = solve_part2_pl(lines)
-    print(f"Part 2: {answer2_pl}")
-    print(f"Part 2 DataFrame: {df_2}")
-    return
 
 
 @app.cell
