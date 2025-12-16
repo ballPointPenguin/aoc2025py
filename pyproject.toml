@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     # Core data science
-    "polars>=1.35.2",
+    "polars>=1.36.1",
     "jax[cpu]>=0.8.1",
     "numpy>=2.3.5",
     # Graph algorithms
@@ -18,13 +18,13 @@ dependencies = [
     # Advent of Code data fetching
     "advent-of-code-data>=2.1.0",
     # Notebook environment
-    "marimo>=0.18.2",
+    "marimo>=0.18.4",
     "pyzmq>=27.1.0",
 ]
 
 [dependency-groups]
 dev = [
-    "pytest>=9.0.1",
+    "pytest>=9.0.2",
     "ruff>=0.14.8",
 ]
 

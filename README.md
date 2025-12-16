@@ -147,6 +147,54 @@ uv run ruff check --fix .
 uv run ruff format .
 ```
 
+## Dependency updates (uv workflow)
+
+### Update library versions in `pyproject.toml`
+
+1. Edit the version specifiers in `pyproject.toml` (e.g. bump `polars>=...`, `ruff>=...`).
+2. Regenerate the lockfile and install:
+
+```bash
+uv lock
+uv sync
+```
+
+Tip: to upgrade without manually editing version specifiers, you can use:
+
+```bash
+uv lock --upgrade            # upgrade everything within allowed constraints
+uv lock --upgrade-package polars
+uv sync
+```
+
+### Update `uv` itself (the tool)
+
+If `uv` was installed via the official installer (or `pipx`), update it with:
+
+```bash
+uv self update
+```
+
+If you installed `uv` via Homebrew, use:
+
+```bash
+brew upgrade uv
+```
+
+### Update `uv.lock`
+
+Any time `pyproject.toml` changes (dependencies, dependency groups, Python constraint), re-lock:
+
+```bash
+uv lock
+```
+
+Then ensure your environment matches the lockfile:
+
+```bash
+uv sync
+```
+
 ## Tips
 
 - marimo notebooks auto-reload when you edit `src/aoc_utils/*.py`
